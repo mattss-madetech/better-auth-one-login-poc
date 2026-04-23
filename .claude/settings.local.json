@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.sign-in.service.gov.uk)",
+      "WebFetch(domain:www.better-auth.com)",
+      "WebSearch",
+      "Bash(mise --version)",
+      "Bash(docker --version)",
+      "Bash(pnpm --version)",
+      "Read(//private/tmp/sim-app/**)"
+    ]
+  }
+}
