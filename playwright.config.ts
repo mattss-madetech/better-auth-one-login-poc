@@ -13,9 +13,8 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
-  globalSetup: './e2e/global-setup.ts',
   webServer: {
-    command: 'pnpm dev',
+    command: 'rm -f sqlite.db && pnpm dev',
     url: 'http://localhost:8080/',
     reuseExistingServer: !process.env.CI,
     timeout: 15_000,

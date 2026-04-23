@@ -23,15 +23,32 @@ app.get("/", async (req, res) => {
     res.send(`
       <h1>Signed in</h1>
       <pre>${JSON.stringify(session.user, null, 2)}</pre>
-      <a href="/api/auth/sign-out">Sign out</a>
+      <a href="#" id="sign-out">Sign out</a>
+      <script>
+        document.getElementById('sign-out').addEventListener('click', async function(e) {
+          e.preventDefault();
+          await fetch('/api/auth/sign-out', { method: 'POST' });
+          window.location.href = '/';
+        });
+      </script>
     `);
   } else {
     res.send(`
       <h1>GOV.UK One Login POC</h1>
       <p>Testing Better Auth <code>private_key_jwt</code> support with the GOV.UK One Login simulator.</p>
-      <a href="/api/auth/sign-in/social?provider=gov-uk-one-login&callbackURL=/">
-        Sign in with GOV.UK One Login
-      </a>
+      <a href="#" id="sign-in">Sign in with GOV.UK One Login</a>
+      <script>
+        document.getElementById('sign-in').addEventListener('click', async function(e) {
+          e.preventDefault();
+          const res = await fetch('/api/auth/sign-in/social', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider: 'gov-uk-one-login', callbackURL: '/' })
+          });
+          const data = await res.json();
+          if (data.url) window.location.href = data.url;
+        });
+      </script>
     `);
   }
 });
