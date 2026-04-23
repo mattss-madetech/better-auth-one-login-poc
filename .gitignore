@@ -1,6 +1,14 @@
 node_modules/
 .env
+.env.local
+.env.*.local
 sqlite.db
+*.db
 dist/
 test-results/
+*.pem
+*.key
+*.jwk
+keys/
+certs/
 .claude/settings.local.json
