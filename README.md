@@ -1,6 +1,6 @@
 # Better Auth × GOV.UK One Login
 
-A proof-of-concept showing [Better Auth](https://www.better-auth.com) (beta) working end-to-end with the [GOV.UK One Login](https://signin.account.gov.uk) service using `private_key_jwt` client authentication (RFC 7523). The integration runs against the official [GOV.UK One Login simulator](https://github.com/govuk-one-login/simulator) locally in Docker.
+A proof-of-concept showing [Better Auth](https://www.better-auth.com) (beta) mounted on an [Express](https://expressjs.com) app working end-to-end with the [GOV.UK One Login](https://signin.account.gov.uk) service using `private_key_jwt` client authentication (RFC 7523). The integration runs against the official [GOV.UK One Login simulator](https://github.com/govuk-one-login/simulator) locally in Docker.
 
 ## Prerequisites
 
