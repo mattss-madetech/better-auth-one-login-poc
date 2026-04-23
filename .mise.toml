@@ -1,2 +1,30 @@
 [tools]
 node = "20"
+
+[tasks.setup]
+description = "First-time setup: install deps, build native modules, generate keys"
+run = [
+  "pnpm install",
+  "pnpm rebuild better-sqlite3",
+  "pnpm run generate-keys",
+]
+
+[tasks.simulator]
+description = "Start the GOV.UK One Login simulator in Docker (port 3000)"
+run = "docker compose up -d"
+
+[tasks."simulator:down"]
+description = "Stop the GOV.UK One Login simulator"
+run = "docker compose down"
+
+[tasks.dev]
+description = "Start the Express dev server on :8080 (runs DB migrations on start)"
+run = "pnpm dev"
+
+[tasks.test]
+description = "Run Playwright end-to-end tests (headless)"
+run = "pnpm test"
+
+[tasks."test:ui"]
+description = "Run Playwright tests with interactive UI"
+run = "pnpm test:ui"
