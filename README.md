@@ -4,13 +4,15 @@ A proof-of-concept showing [Better Auth](https://www.better-auth.com) (beta) wor
 
 ## Prerequisites
 
-- [mise](https://mise.jdx.dev) (manages Node 20 automatically)
-- [pnpm](https://pnpm.io) (`npm install -g pnpm` or via mise)
+- [mise](https://mise.jdx.dev) (manages Node 20 and pnpm 10.16.0 automatically)
 - [Docker](https://www.docker.com) (for the simulator)
 
 ## Quick start
 
 ```bash
+# 0. Install Node and pnpm (once, after cloning)
+mise install
+
 # 1. Install dependencies and generate RSA keys + .env
 mise run setup
 
@@ -26,6 +28,15 @@ Then open http://localhost:8080 and click **Sign in with GOV.UK One Login**.
 To stop the simulator: `mise run simulator:down`
 
 To run tests: `mise run test` (headless) or `mise run test:ui` (interactive)
+
+To start afresh: `mise run clean` removes all generated artifacts (`node_modules`, `sqlite.db`, `.env`, `dist`, `test-results`). Follow up with the full reset cycle:
+
+```bash
+mise run simulator:down
+mise run clean
+mise run setup
+mise run simulator
+```
 
 ## Development workflow
 

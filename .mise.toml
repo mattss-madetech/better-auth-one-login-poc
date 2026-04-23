@@ -1,5 +1,10 @@
 [tools]
 node = "20"
+pnpm = "10.16.0"
+
+[tasks.clean]
+description = "Remove all generated artifacts (node_modules, sqlite.db, .env, dist, test-results)"
+run = "rm -rf node_modules sqlite.db .env dist test-results"
 
 [tasks.setup]
 description = "First-time setup: install deps, build native modules, generate keys"

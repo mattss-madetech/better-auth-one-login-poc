@@ -57,7 +57,7 @@ sqlite.db              Created at runtime by Better Auth migrations (gitignored)
 - **Simulator `SCOPES` is comma-separated**: `"openid,email"` not `"openid email"` — the simulator calls `.split(",")`.
 - **`nonce` is required by GOV.UK One Login**: sent as a static `authorizationUrlParams: { nonce: "poc-nonce" }` in `src/auth.ts`. A production integration would generate a per-request nonce and validate it from the ID token.
 - **Regenerating keys requires restarting Docker**: `docker compose down && docker compose up -d` — `docker compose restart` does not re-read `.env`.
-- **`minimum-release-age` in `.npmrc`**: silently ignored on pnpm 10.12.4 (requires ≥ 10.16). Run `mise use pnpm@latest` to upgrade.
+- **`minimumReleaseAge` in `pnpm-workspace.yaml`**: pnpm ≥ 10.16 uses camelCase `minimumReleaseAge: 1440` (minutes) in `pnpm-workspace.yaml`, not `minimum-release-age` in `.npmrc`. The pnpm version is pinned to 10.16.0 via `.mise.toml`.
 - **Express 4, not 5**: `app.all("/api/auth/*", ...)` uses Express 4 wildcard syntax. Express 5 changed it.
 
 ## Environment variables (`.env`)
