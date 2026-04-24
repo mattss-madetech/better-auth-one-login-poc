@@ -1,8 +1,14 @@
 # Better Auth × GOV.UK One Login
 
-A proof-of-concept showing [Better Auth](https://www.better-auth.com) (beta) mounted on an [Express](https://expressjs.com) app working end-to-end with the [GOV.UK One Login](https://signin.account.gov.uk) service using `private_key_jwt` client authentication (RFC 7523) and identity proving. The integration runs against the official [GOV.UK One Login simulator](https://github.com/govuk-one-login/simulator) locally in Docker.
+> **This is a proof-of-concept. It is not production-ready and should not be used as the basis for a production integration.** Its sole purpose is to demonstrate that [Better Auth](https://www.better-auth.com) (beta) can complete the full GOV.UK One Login authentication and identity-proving flow end-to-end.
 
-After sign-in the app displays the user's verified name, date of birth, identity confidence level (P2), and address — all extracted from the `coreIdentityJWT` credential returned by the `/userinfo` endpoint and validated using the simulator's DID document.
+The POC mounts Better Auth on an [Express](https://expressjs.com) app and runs against the official [GOV.UK One Login simulator](https://github.com/govuk-one-login/simulator) locally in Docker. It exercises `private_key_jwt` client authentication (RFC 7523) and the identity-proving flow: after sign-in the app displays the user's verified name, date of birth, identity confidence level (P2), and address — extracted from the `coreIdentityJWT` credential returned by `/userinfo` and validated against the simulator's DID document.
+
+### What this is not
+
+- **Not production-hardened** — the database is in-memory (wiped on restart), the nonce is static, errors are minimal, and there is no secrets management
+- **Not a reference implementation** — shortcuts were taken to keep the code small and focused on the auth flow
+- **Not kept up to date** — Better Auth is in beta; the API may change
 
 ## Prerequisites
 
