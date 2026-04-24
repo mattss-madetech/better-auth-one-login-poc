@@ -16,6 +16,7 @@ const identityRateLimiter = rateLimit({
 });
 
 // Run Better Auth database migrations on startup
+// (!! not recommended for production use)
 const ctx = await auth.$context;
 await ctx.runMigrations();
 

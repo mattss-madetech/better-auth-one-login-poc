@@ -14,7 +14,7 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    command: 'rm -f sqlite.db && pnpm dev',
+    command: 'pnpm dev',
     url: 'http://localhost:8080/',
     reuseExistingServer: !process.env.CI,
     timeout: 15_000,

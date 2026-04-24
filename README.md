@@ -31,7 +31,7 @@ To stop the simulator: `mise run simulator:down`
 
 To run tests: `mise run test` (headless) or `mise run test:ui` (interactive)
 
-To start afresh: `mise run clean` removes all generated artifacts (`node_modules`, `sqlite.db`, `.env`, `dist`, `test-results`). Follow up with the full reset cycle:
+To start afresh: `mise run clean` removes all generated artifacts (`node_modules`, `.env`, `dist`, `test-results`). Follow up with the full reset cycle:
 
 ```bash
 mise run simulator:down

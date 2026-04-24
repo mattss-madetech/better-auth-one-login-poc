@@ -8,7 +8,7 @@ const privateKeyJwkRaw = process.env.PRIVATE_KEY_JWK;
 if (!clientId) throw new Error("CLIENT_ID env var is required");
 if (!privateKeyJwkRaw) throw new Error("PRIVATE_KEY_JWK env var is required");
 
-export const db = new Database("sqlite.db");
+export const db = new Database(":memory:");
 
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL ?? "http://localhost:8080",

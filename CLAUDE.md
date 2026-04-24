@@ -32,7 +32,7 @@ src/auth.ts            Better Auth config — genericOAuth plugin with private_k
 src/identity.ts        Identity proving — calls /userinfo, validates coreIdentityJWT via DID document
 scripts/generate-keys.ts  One-shot RSA-2048 keypair generator → writes to .env
 docker-compose.yml     GOV.UK One Login Simulator on :3000
-sqlite.db              Created at runtime by Better Auth migrations (gitignored)
+sqlite (in-memory)     Created at runtime by Better Auth migrations; discarded on process exit
 ```
 
 ### Request flow
