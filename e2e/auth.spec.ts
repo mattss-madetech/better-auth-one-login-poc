@@ -19,11 +19,18 @@ test.describe('GOV.UK One Login auth flow', () => {
     await expect(page).toHaveURL('/', { timeout: 10_000 });
     await expect(page.locator('h1')).toHaveText('Signed in');
 
-    const userJson = await page.locator('pre').textContent();
+    // Two <pre> elements are present: session JSON (first) and raw identity JSON (second).
+    const userJson = await page.locator('pre').first().textContent();
     expect(userJson).toBeTruthy();
     const user = JSON.parse(userJson!);
     expect(user).toHaveProperty('id');
     expect(user).toHaveProperty('email');
+
+    // Identity section loads asynchronously — verify name and DOB are shown.
+    const identity = page.locator('#identity');
+    await expect(identity).toContainText('GEOFFREY HEARNSHAW', { timeout: 10_000 });
+    await expect(identity).toContainText('1955-04-19');
+    await expect(identity).toContainText('P2');
 
     await expect(page.getByRole('link', { name: 'Sign out' })).toBeVisible();
   });

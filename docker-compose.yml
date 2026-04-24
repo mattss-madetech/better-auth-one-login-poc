@@ -12,7 +12,7 @@ services:
       REDIRECT_URLS: "http://localhost:8080/api/auth/callback/gov-uk-one-login"
       SCOPES: "openid,email"
       PKCE_ENABLED: "true"
-      IDENTITY_VERIFICATION_SUPPORTED: "false"
+      IDENTITY_VERIFICATION_SUPPORTED: "true"
       SIMULATOR_URL: "http://localhost:3000"
       ID_TOKEN_SIGNING_ALGORITHM: RS256
     restart: unless-stopped
