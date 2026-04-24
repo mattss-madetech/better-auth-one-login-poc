@@ -1,6 +1,8 @@
 TODO
 ----
 
+(This file includes the original instructions given to Claude Code during setup)
+
 Objective
 =========
 Create a POC integration between the "Better Auth" nodejs library and the GOV.UK One Login service
