@@ -1,11 +1,19 @@
 import "dotenv/config";
 import express from "express";
+import rateLimit from "express-rate-limit";
 import { toNodeHandler } from "better-auth/node";
 import { auth, db } from "./auth.js";
 import { validateIdentity } from "./identity.js";
 
 const app = express();
 const PORT = 8080;
+
+const identityRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Run Better Auth database migrations on startup
 const ctx = await auth.$context;
@@ -17,7 +25,7 @@ app.all("/api/auth/*", toNodeHandler(auth));
 
 app.use(express.json());
 
-app.get("/api/identity", async (req, res) => {
+app.get("/api/identity", identityRateLimiter, async (req, res) => {
   const session = await auth.api.getSession({ headers: req.headers as any });
   if (!session?.user) {
     return res.status(401).json({ error: "Not authenticated" });
