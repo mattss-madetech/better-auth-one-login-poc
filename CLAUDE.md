@@ -12,7 +12,7 @@ A POC integration between the [Better Auth](https://www.better-auth.com) library
 # First-time setup (after cloning or after changing keys)
 pnpm install
 pnpm rebuild better-sqlite3     # required: pnpm blocks native builds by default
-pnpm run generate-keys          # writes PRIVATE_KEY_JWK, PUBLIC_KEY_PEM, CLIENT_ID, etc. to .env
+pnpm run generate-keys          # writes PRIVATE_KEY_JWK (with kid), CLIENT_ID, etc. to .env
 
 # Start the simulator (reads .env for client registration)
 docker compose up -d
@@ -30,7 +30,7 @@ There are Playwright e2e tests but no lint/build steps — `tsx` runs TypeScript
 src/server.ts          Express entry point — mounts Better Auth, /api/identity route, serves the / page
 src/auth.ts            Better Auth config — genericOAuth plugin with private_key_jwt; exports db
 src/identity.ts        Identity proving — calls /userinfo, validates coreIdentityJWT via DID document
-scripts/generate-keys.ts  One-shot RSA-2048 keypair generator → writes to .env
+scripts/generate-keys.ts  One-shot RSA-2048 keypair generator → writes PRIVATE_KEY_JWK (with kid) to .env
 docker-compose.yml     GOV.UK One Login Simulator on :3000
 sqlite (in-memory)     Created at runtime by Better Auth migrations; discarded on process exit
 ```
@@ -40,16 +40,16 @@ sqlite (in-memory)     Created at runtime by Better Auth migrations; discarded o
 1. Browser hits `POST /api/auth/sign-in/social?provider=gov-uk-one-login` (Better Auth route)
 2. Better Auth stores `state` + PKCE `code_verifier` in the `verification` SQLite table and returns a redirect URL to the simulator's `/authorize` — including `vtr=["Cl.Cm.P2"]` (medium identity confidence) and a `claims` parameter requesting `coreIdentityJWT` and `address`
 3. Simulator redirects back to `/api/auth/callback/gov-uk-one-login?code=…&state=…`
-4. Better Auth retrieves the stored `code_verifier`, then calls the simulator's `/token` endpoint with a signed `client_assertion` JWT (`private_key_jwt`)
-5. Simulator verifies the assertion against `PUBLIC_KEY` (SPKI PEM registered at startup), issues tokens
+4. Better Auth retrieves the stored `code_verifier`, then calls the simulator's `/token` endpoint with a signed `client_assertion` JWT (`private_key_jwt`) — the JWT header includes `kid`
+5. Simulator fetches `GET /.well-known/jwks.json` from the Express app, finds the key matching `kid`, verifies the assertion, issues tokens
 6. Better Auth calls `/userinfo` to get the user's email, stores the access token in the `account` table, creates a session; browser is redirected to `/`
 7. Browser loads `/` → page JS calls `GET /api/identity`
 8. `/api/identity` queries the `account` table for the access token, calls `/userinfo` with a `User-Agent` header, extracts and validates the `coreIdentityJWT` (ES256 signature via the simulator's DID document, `iss`/`aud`/`sub`/`exp` claims), and returns name, DOB, confidence level, and address
 
 ### Key configuration wiring
 
-- `PRIVATE_KEY_JWK` (from `.env`) → `src/auth.ts` `clientAssertion.privateKeyJwk` — signs the JWT assertion
-- `PUBLIC_KEY_PEM` (from `.env`) → docker-compose `PUBLIC_KEY` env var → simulator verifies assertions
+- `PRIVATE_KEY_JWK` (from `.env`) → `src/auth.ts` `clientAssertion.privateKeyJwk` — signs the JWT assertion (includes `kid`; jose propagates it to the JWT header automatically)
+- `PRIVATE_KEY_JWK` public fields → `GET /.well-known/jwks.json` in `server.ts` — simulator fetches this to verify assertions
 - `CLIENT_ID` → both `src/auth.ts` and docker-compose must agree on the same value
 - `IDENTITY_VERIFICATION_SUPPORTED: "true"` in docker-compose → simulator returns `coreIdentityJWT` + `address` in `/userinfo`
 - Database migrations run automatically on startup via `await (await auth.$context).runMigrations()`
@@ -58,7 +58,8 @@ sqlite (in-memory)     Created at runtime by Better Auth migrations; discarded o
 ## Non-obvious gotchas
 
 - **`better-sqlite3` native build**: `pnpm install` alone is not enough — run `pnpm rebuild better-sqlite3` after install. The `onlyBuiltDependencies` field in `package.json` allows the build; `pnpm rebuild` triggers it.
-- **`PUBLIC_KEY_PEM` must be double-quoted in `.env`**: docker-compose only interprets `\n` as real newlines inside double-quoted values. `generate-keys.ts` writes `PUBLIC_KEY_PEM="-----BEGIN PUBLIC KEY-----\nMII..."`. If this quoting is lost, `importSPKI` in the simulator will fail.
+- **Express server must be running before the OAuth flow**: the simulator fetches `/.well-known/jwks.json` at token-exchange time, so `pnpm dev` must be started before signing in. (The flow is user-initiated, so this is always true in practice.)
+- **`host.docker.internal` for JWKs URL**: docker-compose sets `JWKS_URL: http://host.docker.internal:8080/.well-known/jwks.json`. On Docker Desktop for Mac/Windows, `host.docker.internal` resolves to the host machine. On Linux, you may need to add `extra_hosts: ["host.docker.internal:host-gateway"]` to docker-compose.yml.
 - **Simulator `SCOPES` is comma-separated**: `"openid,email"` not `"openid email"` — the simulator calls `.split(",")`.
 - **`nonce` is required by GOV.UK One Login**: sent as a static `authorizationUrlParams: { nonce: "poc-nonce" }` in `src/auth.ts`. A production integration would generate a per-request nonce and validate it from the ID token.
 - **Regenerating keys requires restarting Docker**: `docker compose down && docker compose up -d` — `docker compose restart` does not re-read `.env`.
@@ -76,8 +77,7 @@ Generated by `pnpm run generate-keys`. See `.env.example` for the shape.
 
 | Variable | Used by |
 |---|---|
-| `PRIVATE_KEY_JWK` | `src/auth.ts` — signs client assertions |
-| `PUBLIC_KEY_PEM` | docker-compose → simulator — verifies assertions |
+| `PRIVATE_KEY_JWK` | `src/auth.ts` — signs client assertions; public fields served at `/.well-known/jwks.json` |
 | `CLIENT_ID` | both `src/auth.ts` and docker-compose |
 | `BETTER_AUTH_SECRET` | Better Auth session signing |
 | `BETTER_AUTH_URL` | Better Auth base URL (default `http://localhost:8080`) |
