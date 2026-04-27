@@ -8,6 +8,12 @@ import { validateIdentity } from "./identity.js";
 const app = express();
 const PORT = 8080;
 
+// Derive the public JWK from the private key JWK — strip private fields, add use:"sig"
+const _privateJwk = JSON.parse(process.env.PRIVATE_KEY_JWK!);
+const jwks = {
+  keys: [{ kty: _privateJwk.kty, n: _privateJwk.n, e: _privateJwk.e, use: "sig", alg: "RS256", kid: _privateJwk.kid }],
+};
+
 const identityRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 60,
@@ -23,6 +29,8 @@ await ctx.runMigrations();
 // Better Auth handles all /api/auth/* routes.
 // Must be registered before express.json() — Better Auth reads the raw request body.
 app.all("/api/auth/*", toNodeHandler(auth));
+
+app.get("/.well-known/jwks.json", (_req, res) => res.json(jwks));
 
 app.use(express.json());
 
